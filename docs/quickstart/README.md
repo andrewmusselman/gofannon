@@ -9,6 +9,7 @@ Add .env file with these contents:
 ```bash
 OPENAI_API_KEY=sk-proj-your-key
 ANTHROPIC_API_KEY=sk-ant-your-key
+# GEMINI_API_KEY if you have one
 COUCHDB_USER=admin
 COUCHDB_PASSWORD=password
 ```
@@ -28,13 +29,20 @@ http://127.0.0.1:3000/
 ## Create agent
 ![Create agent](images/create-agent.png)
 
-## Add description (prompt)
+### Choose tools if needed
+* MCP server by URL
+* Swagger spec by file or URL
+* Agents and tools already deployed on this Gofannon instance
+
+### Add description (prompt)
 ![Add description](images/add-description.png)
 
 ## Choose compose and invokable models
 
 ### Set model
 ![Set models](images/set-model.png)
+
+### Choose provider, model, params
 ![Model dialog](images/set-model-dialog.png)
 
 ### Optionally select built-in tool

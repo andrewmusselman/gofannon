@@ -267,7 +267,7 @@ When working with repositories, large datasets, or any data that will be sent to
    - Keep batches under **150K tokens** (leaving room for prompt overhead + response)
    - Create a batching function:
      ```python
-     def create_batches(files_dict, max_tokens=150000):
+     def create_batches(files_dict, max_tokens=130000):
          batches = []
          current_batch = {{}}
          current_tokens = 0
@@ -287,26 +287,38 @@ When working with repositories, large datasets, or any data that will be sent to
 3. **Multi-Batch Analysis** - If data requires multiple batches:
    - Process each batch with a separate LLM call
    - Track findings from each batch
-   - If multiple batches: make a final consolidation call to summarize/deduplicate findings
-   - Example pattern:
-     ```python
-     batches = create_batches(file_contents)
-     all_findings = []
-     for batch_num, batch_files in enumerate(batches, 1):
-         # Analyze batch
-         response = await litellm.acompletion(model="...", messages=[...])
-         all_findings.append(response.choices[0].message.content)
-     
-     if len(batches) > 1:
-         # Consolidate findings
-         summary_response = await litellm.acompletion(
-             model="...",
-             messages=[{{"role": "user", "content": f"Consolidate these findings: {{all_findings}}"}}]
-         )
-         final_result = summary_response.choices[0].message.content
-     else:
-         final_result = all_findings[0]
-     ```
+   - For 2 batches: single consolidation call
+   - For 3+ batches: use **progressive consolidation** to avoid context overflow
+```python
+   batches = create_batches(file_contents)
+   batch_results = []
+
+   for batch_num, batch_files in enumerate(batches, 1):
+       response = await litellm.acompletion(model="...", messages=[...])
+       batch_results.append(response.choices[0].message.content)
+
+   # Progressive consolidation for many batches
+   if len(batch_results) > 2:
+       # Consolidate in pairs to avoid context overflow
+       while len(batch_results) > 1:
+           consolidated = []
+           for i in range(0, len(batch_results), 2):
+               if i + 1 < len(batch_results):
+                   pair_prompt = f"Consolidate these two analysis results:\\n\\nRESULT A:\\n{{batch_results[i]}}\\n\\n---\\n\\nRESULT B:\\n{{batch_results[i+1]}}\\n\\nDeduplicate, merge, remove contradictions. Output clean markdown."
+                   response = await litellm.acompletion(model="...", messages=[{{"role": "user", "content": pair_prompt}}])
+                   consolidated.append(response.choices[0].message.content)
+               else:
+                   consolidated.append(batch_results[i])
+           batch_results = consolidated
+       final_result = batch_results[0]
+   elif len(batch_results) == 2:
+       # Standard consolidation for 2 batches
+       consolidation_prompt = f"Consolidate these results:\\n\\n{{'---SEPARATOR---'.join(batch_results)}}"
+       response = await litellm.acompletion(model="...", messages=[{{"role": "user", "content": consolidation_prompt}}])
+       final_result = response.choices[0].message.content
+   else:
+       final_result = batch_results[0]
+```
 
 4. **Report What Was Processed** - Always include in the output:
    - How many files/items were analyzed

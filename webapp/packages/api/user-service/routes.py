@@ -506,7 +506,8 @@ async def run_agent_code(
             input_dict=request.input_dict,
             tools=request.tools,
             gofannon_agents=request.gofannon_agents,
-            db=db
+            db=db,
+            llm_settings=request.llm_settings
         )
 
         logger.log("INFO", "sandbox_run", "Agent code executed successfully.", metadata={"request": get_sanitized_request_data(req)})

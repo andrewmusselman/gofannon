@@ -32,23 +32,54 @@ const SandboxScreen = () => {
   const tools = agentData?.tools || agentFlowContext.tools;
   const generatedCode = agentData?.code || agentFlowContext.generatedCode;
   const gofannonAgents = agentData?.gofannonAgents || agentFlowContext.gofannonAgents;
+  const invokableModels = agentData?.invokableModels || agentFlowContext.invokableModels || [];
+  const composerModelConfig = agentData?.composerModelConfig || agentFlowContext.composerModelConfig;
+  
+  // Extract LLM settings from invokable models or composer config
+  const getLlmSettings = () => {
+    
+    // Try invokable models first
+    if (invokableModels && invokableModels.length > 0) {
+      const firstModel = invokableModels[0];
+      const params = firstModel.parameters || {};
+      const settings = {
+        maxTokens: params.max_tokens || params.maxTokens,
+        temperature: params.temperature,
+        reasoningEffort: params.reasoning_effort || params.reasoningEffort,
+      };
+      // Only return if we have at least one setting
+      if (settings.maxTokens || settings.temperature !== undefined || settings.reasoningEffort) {
+        return settings;
+      }
+    }
+    
+    // Fallback to composer model config
+    if (composerModelConfig?.parameters) {
+      const params = composerModelConfig.parameters;
+      const settings = {
+        maxTokens: params.max_tokens || params.maxTokens,
+        temperature: params.temperature,
+        reasoningEffort: params.reasoning_effort || params.reasoningEffort,
+      };
+      if (settings.maxTokens || settings.temperature !== undefined || settings.reasoningEffort) {
+        return settings;
+      }
+    }
+    
+    return null;
+  };
 
-  console.log('[SandboxScreen] Render - agentData:', !!agentData, 'generatedCode:', !!generatedCode, 'loadingAgent:', loadingAgent);
 
   // Fetch agent data if we have an agentId and context is empty
   useEffect(() => {
     const needsToFetch = agentId && !agentFlowContext.generatedCode;
-    console.log('[SandboxScreen] agentId:', agentId, 'contextCode:', !!agentFlowContext.generatedCode, 'needsToFetch:', needsToFetch);
     
     if (needsToFetch) {
       const fetchAgent = async () => {
         setLoadingAgent(true);
         setLoadError(null);
         try {
-          console.log('[SandboxScreen] Fetching agent:', agentId);
           const data = await agentService.getAgent(agentId);
-          console.log('[SandboxScreen] Fetched agent data:', data);
-          console.log('[SandboxScreen] Agent code exists:', !!data.code);
           // Transform gofannonAgents if needed
           if (data.gofannonAgents && data.gofannonAgents.length > 0) {
             const allAgents = await agentService.getAgents();
@@ -99,7 +130,9 @@ const SandboxScreen = () => {
     observabilityService.log({ eventType: 'user-action', message: 'User running agent in sandbox.' });
 
     try {
-      const response = await agentService.runCodeInSandbox(generatedCode, formData, tools, gofannonAgents);
+      const llmSettings = getLlmSettings();
+      console.log('[SandboxScreen] handleRun - sending llmSettings:', llmSettings);
+      const response = await agentService.runCodeInSandbox(generatedCode, formData, tools, gofannonAgents, llmSettings);
       if (response.error) {
         setError(response.error);
       } else {

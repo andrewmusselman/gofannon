@@ -5,17 +5,20 @@
 models = {
     # =========================================================================
     # Claude 4.5 family (Latest - November 2025)
-    # Note: Cannot specify both temperature and top_p - pick one
+    # - Opus 4.5 supports effort parameter (controls all token usage)
+    # - All support extended thinking via reasoning_effort
     # =========================================================================
     "claude-opus-4-5-20251101": {
-        "returns_thoughts": False,
+        "returns_thoughts": True,
+        "supports_effort": True,
+        "supports_thinking": True,
         "parameters": {
             "temperature": {
                 "type": "float",
                 "default": 1.0,
                 "min": 0.0,
                 "max": 1.0,
-                "description": "Randomness (0=focused, 1=creative)"
+                "description": "Randomness (0=focused, 1=creative). Locked to 1.0 when thinking enabled."
             },
             "top_p": {
                 "type": "float",
@@ -29,13 +32,21 @@ models = {
                 "type": "integer",
                 "default": 8192,
                 "min": 1,
-                "max": 16384,
+                "max": 64000,
                 "description": "Maximum tokens in response"
+            },
+            "reasoning_effort": {
+                "type": "choice",
+                "default": "disable",
+                "choices": ["disable", "low", "medium", "high"],
+                "description": "Reasoning Effort: Enables extended thinking and controls effort level"
             },
         }
     },
     "claude-sonnet-4-5-20250929": {
-        "returns_thoughts": False,
+        "returns_thoughts": True,
+        "supports_effort": False,
+        "supports_thinking": True,
         "parameters": {
             "temperature": {
                 "type": "float",
@@ -56,13 +67,21 @@ models = {
                 "type": "integer",
                 "default": 8192,
                 "min": 1,
-                "max": 16384,
+                "max": 64000,
                 "description": "Maximum tokens in response"
+            },
+            "reasoning_effort": {
+                "type": "choice",
+                "default": "disable",
+                "choices": ["disable", "low", "medium", "high"],
+                "description": "Reasoning Effort: Enables extended thinking and controls effort level"
             },
         }
     },
     "claude-haiku-4-5-20251001": {
-        "returns_thoughts": False,
+        "returns_thoughts": True,
+        "supports_effort": False,
+        "supports_thinking": True,
         "parameters": {
             "temperature": {
                 "type": "float",
@@ -83,8 +102,14 @@ models = {
                 "type": "integer",
                 "default": 8192,
                 "min": 1,
-                "max": 16384,
+                "max": 64000,
                 "description": "Maximum tokens in response"
+            },
+            "reasoning_effort": {
+                "type": "choice",
+                "default": "disable",
+                "choices": ["disable", "low", "medium", "high"],
+                "description": "Reasoning Effort: Enables extended thinking and controls effort level"
             },
         }
     },
@@ -93,7 +118,9 @@ models = {
     # Claude 4.1 (August 2025)
     # =========================================================================
     "claude-opus-4-1-20250805": {
-        "returns_thoughts": False,
+        "returns_thoughts": True,
+        "supports_effort": False,
+        "supports_thinking": True,
         "parameters": {
             "temperature": {
                 "type": "float",
@@ -114,8 +141,14 @@ models = {
                 "type": "integer",
                 "default": 8192,
                 "min": 1,
-                "max": 16384,
+                "max": 32768,
                 "description": "Maximum tokens in response"
+            },
+            "reasoning_effort": {
+                "type": "choice",
+                "default": "disable",
+                "choices": ["disable", "low", "medium", "high"],
+                "description": "Reasoning Effort: Enables extended thinking and controls effort level"
             },
         }
     },
@@ -124,7 +157,9 @@ models = {
     # Claude 4 (May 2025)
     # =========================================================================
     "claude-opus-4-20250514": {
-        "returns_thoughts": False,
+        "returns_thoughts": True,
+        "supports_effort": False,
+        "supports_thinking": True,
         "parameters": {
             "temperature": {
                 "type": "float",
@@ -145,13 +180,21 @@ models = {
                 "type": "integer",
                 "default": 8192,
                 "min": 1,
-                "max": 16384,
+                "max": 32768,
                 "description": "Maximum tokens in response"
+            },
+            "reasoning_effort": {
+                "type": "choice",
+                "default": "disable",
+                "choices": ["disable", "low", "medium", "high"],
+                "description": "Reasoning Effort: Enables extended thinking and controls effort level"
             },
         }
     },
     "claude-sonnet-4-20250514": {
-        "returns_thoughts": False,
+        "returns_thoughts": True,
+        "supports_effort": False,
+        "supports_thinking": True,
         "parameters": {
             "temperature": {
                 "type": "float",
@@ -172,8 +215,14 @@ models = {
                 "type": "integer",
                 "default": 8192,
                 "min": 1,
-                "max": 16384,
+                "max": 32768,
                 "description": "Maximum tokens in response"
+            },
+            "reasoning_effort": {
+                "type": "choice",
+                "default": "disable",
+                "choices": ["disable", "low", "medium", "high"],
+                "description": "Reasoning Effort: Enables extended thinking and controls effort level"
             },
         }
     },
@@ -182,7 +231,9 @@ models = {
     # Claude 3.7 (February 2025)
     # =========================================================================
     "claude-3-7-sonnet-20250219": {
-        "returns_thoughts": False,
+        "returns_thoughts": True,
+        "supports_effort": False,
+        "supports_thinking": True,
         "parameters": {
             "temperature": {
                 "type": "float",
@@ -203,17 +254,25 @@ models = {
                 "type": "integer",
                 "default": 8192,
                 "min": 1,
-                "max": 8192,
-                "description": "Maximum tokens in response"
+                "max": 128000,
+                "description": "Maximum tokens in response (128K requires beta header)"
+            },
+            "reasoning_effort": {
+                "type": "choice",
+                "default": "disable",
+                "choices": ["disable", "low", "medium", "high"],
+                "description": "Reasoning Effort: Enables extended thinking and controls effort level"
             },
         }
     },
 
     # =========================================================================
-    # Claude 3.5 family (2024)
+    # Claude 3.5 family (2024) - No extended thinking support
     # =========================================================================
     "claude-3-5-sonnet-20241022": {
         "returns_thoughts": False,
+        "supports_effort": False,
+        "supports_thinking": False,
         "parameters": {
             "temperature": {
                 "type": "float",
@@ -241,6 +300,8 @@ models = {
     },
     "claude-3-5-sonnet-20240620": {
         "returns_thoughts": False,
+        "supports_effort": False,
+        "supports_thinking": False,
         "parameters": {
             "temperature": {
                 "type": "float",
@@ -268,6 +329,8 @@ models = {
     },
     "claude-3-5-haiku-20241022": {
         "returns_thoughts": False,
+        "supports_effort": False,
+        "supports_thinking": False,
         "parameters": {
             "temperature": {
                 "type": "float",
@@ -299,6 +362,8 @@ models = {
     # =========================================================================
     "claude-3-haiku-20240307": {
         "returns_thoughts": False,
+        "supports_effort": False,
+        "supports_thinking": False,
         "parameters": {
             "temperature": {
                 "type": "float",

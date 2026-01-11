@@ -51,7 +51,6 @@ async def call_llm(
     api_style = model_config.get("api_style")
 
     model_string = f"{provider}/{model}"
-    
     thoughts = None
     content = ""
 
@@ -238,7 +237,6 @@ async def call_llm(
             raise
         message = response.choices[0].message
         content = message.content if isinstance(message.content, str) else ""
-        
         # Extract various forms of "thoughts"
         thoughts_payload = {}
         if message.tool_calls:

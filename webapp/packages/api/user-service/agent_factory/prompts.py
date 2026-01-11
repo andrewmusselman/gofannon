@@ -55,24 +55,29 @@ async def acompletion(model: str, messages: list, **kwargs):
         A list of dictionaries representing the conversation history,
         following the format: `[{"role": "user", "content": "Hello"}, ...]`.
     :param kwargs: 
-        Additional parameters to pass to the model provider's API,
-        such as `temperature`, `max_tokens`, `top_p`, etc.
+        OPTIONAL additional parameters. The runtime will automatically inject
+        the user's configured settings (max_tokens, temperature, reasoning_effort, etc.).
+        Only specify these if you need to override the user's settings for a specific reason.
 
     :return: 
         A `ModelResponse` object from litellm. To get the content,
         access `response.choices[0].message.content`.
 
-    :Example:
+    :Example (RECOMMENDED - let runtime inject settings):
     >>> import litellm
     >>> response = await litellm.acompletion(
-    ...     model="gpt-3.5-turbo",
-    ...     messages=[{"role": "user", "content": "Summarize this for me."}],
-    ...     temperature=0.7,
-    ...     max_tokens=150
+    ...     model="anthropic/claude-opus-4-5-20251101",
+    ...     messages=[{"role": "user", "content": "Summarize this for me."}]
     ... )
     >>> summary = response.choices[0].message.content
-    >>> print(summary)
-    "This is a summary." # (Example Output)
+
+    :Example (only if you MUST override user settings):
+    >>> response = await litellm.acompletion(
+    ...     model="gpt-3.5-turbo",
+    ...     messages=[{"role": "user", "content": "Quick answer needed."}],
+    ...     temperature=0.0,  # Only if specifically required
+    ...     max_tokens=100    # Only if specifically required
+    ... )
     '''
 """
 
@@ -178,14 +183,183 @@ The function **MUST** return a dictionary that conforms to the following output 
 {output_schema}
 ```
 
-**Instructions:**
+**CRITICAL Instructions:**
 Your task is to implement the logic for this function based on the user's request.
 ONLY return the Python code for the function body.
 - Do NOT include the `async def run(...)` function signature.
-- Do NOT include any imports.
+- Do NOT include any imports at the top level.
 - Do NOT wrap the code in Markdown backticks (```).
 - Do NOT add any explanations or surrounding text.
 - Your code will be executed inside an `async` function, so you can and should use `await` for async calls.
+
+**CRITICAL - Imports MUST Be Inside the Function Body:**
+The sandbox environment strips top-level imports. You MUST place all imports INSIDE the function body:
+```python
+# WRONG - will cause NameError:
+import base64
+import json
+
+async def run(input_dict, tools):
+    data = base64.b64decode(...)  # NameError: name 'base64' is not defined
+
+# CORRECT - imports inside function:
+async def run(input_dict, tools):
+    import base64
+    import json
+    from datetime import datetime
+    
+    data = base64.b64decode(...)  # Works!
+```
+Common imports you may need inside the function body:
+- `import json` - for JSON parsing
+- `import re` - for regex operations
+- `import base64` - for base64 encoding/decoding (GitHub API responses)
+- `from datetime import datetime` - for timestamps
+
+**IMPORTANT - Avoid Artificial Limits:**
+- Do NOT add arbitrary limits on file counts, data sizes, or content lengths unless the user explicitly requests them.
+- Do NOT truncate file contents, API responses, or other data unless the user specifies truncation.
+- Do NOT add "safety limits" like `max_files = 100` or `content[:15000]` - let the system handle resource management.
+- Process ALL data the user requests without artificial caps.
+
+**IMPORTANT - LLM Parameters:**
+- When calling `litellm.acompletion()`, do NOT hardcode `max_tokens`, `temperature`, or other parameters.
+- Simply call `await litellm.acompletion(model="...", messages=[...])` without additional kwargs.
+- The runtime environment will inject the user's configured LLM settings automatically.
+- Only add LLM parameters if the user explicitly requests specific values in their description.
+
+**IMPORTANT - Handling Large Data & LLM Context Limits:**
+When working with repositories, large datasets, or any data that will be sent to an LLM for analysis:
+
+1. **Skip Non-Essential Content** - Filter out files/directories that aren't relevant to the task:
+   
+   **Directories to skip:**
+   - Documentation: `docs/`, `doc/`, `documentation/`
+   - Dependencies: `node_modules/`, `vendor/`, `third_party/`, `third-party/`
+   - Build outputs: `dist/`, `build/`, `out/`, `target/`
+   - Cache: `__pycache__/`, `.pytest_cache/`, `.mypy_cache/`, `coverage/`, `.next/`, `.nuxt/`
+   - Assets: `assets/`, `images/`, `img/`, `static/images/`, `static/fonts/`, `static/webfonts/`, `public/images/`, `fonts/`, `webfonts/`
+   - CI workflows: `.github/workflows/` (unless specifically analyzing CI)
+   - Tests: `test/`, `tests/`, `spec/`, `specs/` (unless specifically analyzing tests)
+   - Database migrations: `migrations/`
+   - Virtual environments: `venv/`, `.venv/`, `env/`, `.env/`
+   
+   **Files to skip:**
+   - Lock files: `package-lock.json`, `yarn.lock`, `poetry.lock`, `Cargo.lock`, `composer.lock`, `pnpm-lock.yaml`, `Gemfile.lock`
+   - Boilerplate: `LICENSE`, `LICENSE.md`, `LICENSE.txt`, `README.md`, `README.rst`, `README.txt`, `README`, `CHANGELOG.md`, `CHANGELOG`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`
+   - Config: `.gitignore`, `.dockerignore`, `.prettierrc`, `.eslintrc`, `.editorconfig`, `Makefile`, `Dockerfile`, `.npmrc`, `.yarnrc`
+   - Build config: `tsconfig.json`, `jsconfig.json`, `babel.config.js`, `webpack.config.js`, `rollup.config.js`, `vite.config.js`, `jest.config.js`
+   
+   **Static assets to skip (by extension):**
+   - Minified: `.min.js`, `.min.css`, `.bundle.js`, `.bundle.css`
+   - Source maps: `.map`
+   - Styles: `.css`, `.scss`, `.less`, `.sass`, `.styl` (unless specifically analyzing styles)
+   - Fonts: `.woff`, `.woff2`, `.ttf`, `.eot`, `.otf`
+   - Images: `.png`, `.jpg`, `.jpeg`, `.gif`, `.svg`, `.ico`, `.webp`, `.bmp`
+   - Media: `.mp3`, `.mp4`, `.wav`, `.avi`, `.mov`, `.webm`, `.ogg`
+   - Documents: `.pdf`, `.doc`, `.docx`, `.xls`, `.xlsx`, `.ppt`, `.pptx`
+   - Archives: `.zip`, `.tar`, `.gz`, `.rar`, `.7z`
+   - Binaries: `.exe`, `.dll`, `.so`, `.dylib`, `.pyc`, `.pyo`, `.class`, `.o`, `.obj`
+   - Text/docs: `.md`, `.rst`, `.txt` (unless specifically needed)
+
+2. **Token-Aware Batching** - LLMs have context limits (~200K tokens). When sending large amounts of text:
+   - Estimate tokens: `estimated_tokens = len(text) // 4`
+   - Keep batches under **150K tokens** (leaving room for prompt overhead + response)
+   - Create a batching function:
+     ```python
+     def create_batches(files_dict, max_tokens=150000):
+         batches = []
+         current_batch = {{}}
+         current_tokens = 0
+         for path, content in files_dict.items():
+             file_tokens = len(content) // 4
+             if current_tokens + file_tokens > max_tokens and current_batch:
+                 batches.append(current_batch)
+                 current_batch = {{}}
+                 current_tokens = 0
+             current_batch[path] = content
+             current_tokens += file_tokens
+         if current_batch:
+             batches.append(current_batch)
+         return batches
+     ```
+
+3. **Multi-Batch Analysis** - If data requires multiple batches:
+   - Process each batch with a separate LLM call
+   - Track findings from each batch
+   - If multiple batches: make a final consolidation call to summarize/deduplicate findings
+   - Example pattern:
+     ```python
+     batches = create_batches(file_contents)
+     all_findings = []
+     for batch_num, batch_files in enumerate(batches, 1):
+         # Analyze batch
+         response = await litellm.acompletion(model="...", messages=[...])
+         all_findings.append(response.choices[0].message.content)
+     
+     if len(batches) > 1:
+         # Consolidate findings
+         summary_response = await litellm.acompletion(
+             model="...",
+             messages=[{{"role": "user", "content": f"Consolidate these findings: {{all_findings}}"}}]
+         )
+         final_result = summary_response.choices[0].message.content
+     else:
+         final_result = all_findings[0]
+     ```
+
+4. **Report What Was Processed** - Always include in the output:
+   - How many files/items were analyzed
+   - What was skipped and why (grouped by category: directory, filename, static asset)
+   - How many batches were needed (if applicable)
+   - This transparency lets users verify nothing important was missed
+
+5. **Output Format Preference:**
+   - Prefer clean **markdown** output over JSON for reports
+   - JSON is harder to read and often gets parsing errors
+   - Markdown renders nicely and is easier to consolidate
+
+6. **Consolidation Must Check Contradictions:**
+   When consolidating multi-batch results:
+   - Remove duplicates
+   - If something appears as "Positive Pattern" in ANY batch, remove from Findings
+   - Verify data origins - remove findings where data is from database/config
+   - Ensure consistent severity ratings
+
+7. **Consolidation prompt for multi-batch (markdown-based):**
+   ```python
+   consolidation_prompt = f\"\"\"You are consolidating security audit results from multiple batches.
+
+   ## Batch Results:
+   {{"---BATCH SEPARATOR---".join(batch_results)}}
+
+   ## Your Task:
+   1. **Deduplicate** - Merge findings describing the same vulnerability
+   2. **Check Contradictions** - If "Positive Pattern" in ANY batch, remove from Findings
+   3. **Verify Data Origins** - Remove findings where data is from database/config
+   4. **Consistent Severity** - Ensure similar issues have same severity
+
+   Output a single consolidated markdown report. NO JSON anywhere.\"\"\"
+   ```
+
+**IMPORTANT - LLM Analysis Output Format:**
+When using LLMs to analyze code and produce reports, use MARKDOWN output instead of JSON:
+
+1. **DO NOT ask the LLM to output JSON** - It's fragile and error-prone:
+   ```python
+   # BAD - Fragile JSON extraction that often fails:
+   json_match = re.search(r'```json\\s*(.*?)\\s*```', analysis_text, re.DOTALL)
+   if json_match:
+       analysis_data = json.loads(json_match.group(1))  # Often fails!
+       all_findings.extend(analysis_data.get('findings', []))
+   ```
+
+2. **DO ask the LLM to output clean markdown** - Use it directly:
+   ```python
+   # GOOD - Direct markdown usage:
+   response = await litellm.acompletion(model="...", messages=[...])
+   batch_results.append(response.choices[0].message.content)  # Just use it!
+   ```
 """
 
 

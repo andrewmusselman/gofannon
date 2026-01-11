@@ -17,6 +17,10 @@ import time
 from fastapi.responses import JSONResponse
 
 
+# --- Log Level Configuration ---
+LOG_LEVEL_ORDER = {"DEBUG": 0, "INFO": 1, "WARN": 2, "WARNING": 2, "ERROR": 3}
+
+
 # --- Abstract Base Class for Providers ---
 
 class LogProvider(abc.ABC):
@@ -89,10 +93,6 @@ class AWSCloudWatchLogsProvider(LogProvider):
             'message': json.dumps(payload, default=str)
         }
 
-        # NOTE: The standard boto3 client is synchronous. This log call will block
-        # the asyncio task that runs it. For high-throughput applications,
-        # consider using a library like 'aioboto3' to make this operation
-        # fully non-blocking.
         try:
             self.client.put_log_events(
                 logGroupName=self.log_group_name,
@@ -119,13 +119,16 @@ class ConsoleProvider(LogProvider):
         print("Console logging provider initialized.")
 
     async def log(self, payload: Dict[str, Any]):
-        print(f"LOG: {json.dumps(payload, indent=2, default=str)}")
+        # Use flush=True to ensure immediate output in Docker
+        print(f"LOG: {json.dumps(payload, indent=2, default=str)}", flush=True)
 
 # --- Main Observability Service ---
 
 class ObservabilityService:
     def __init__(self):
         self.providers: List[LogProvider] = []
+        self.min_log_level = os.getenv("LOG_LEVEL", "INFO").upper()
+        self.sync_logging = os.getenv("SYNC_LOGGING", "false").lower() == "true"
         self._initialize_providers()
 
     def _initialize_providers(self):
@@ -158,16 +161,14 @@ class ObservabilityService:
             print("No observability providers configured. Defaulting to console logging.")
             self.providers.append(ConsoleProvider())
 
+    def _should_log(self, level: str) -> bool:
+        """Check if the given level meets the minimum threshold."""
+        level_val = LOG_LEVEL_ORDER.get(level.upper(), 1)
+        min_val = LOG_LEVEL_ORDER.get(self.min_log_level, 1)
+        return level_val >= min_val
 
     def _sanitize_for_json(self, value: Any) -> Any:
-        """Recursively coerce values into JSON-serializable equivalents.
-
-        This protects logging codepaths that run in environments without
-        FastAPI (e.g., Firebase callable functions) where metadata may contain
-        awaitables or other non-serializable objects. Anything unknown is
-        converted to a string representation so that downstream JSON encoding
-        never fails.
-        """
+        """Recursively coerce values into JSON-serializable equivalents."""
         if isinstance(value, dict):
             return {k: self._sanitize_for_json(v) for k, v in value.items()}
         if isinstance(value, list):
@@ -190,9 +191,13 @@ class ObservabilityService:
         metadata: Optional[Dict[str, Any]] = None,
     ):
         """
-        Creates a log payload and sends it to all configured providers asynchronously.
-        This is a fire-and-forget method.
+        Creates a log payload and sends it to all configured providers.
+        Respects LOG_LEVEL filtering and SYNC_LOGGING mode.
         """
+        # Filter by log level
+        if not self._should_log(level):
+            return
+
         raw_payload = {
             "timestamp": datetime.utcnow().isoformat(),
             "level": level.upper(),
@@ -209,8 +214,22 @@ class ObservabilityService:
             tasks = [provider.log(payload) for provider in self.providers]
             await asyncio.gather(*tasks)
 
-        # Run in the background without blocking the caller
-        asyncio.create_task(_log_async())
+        # Sync mode for debugging - ensures logs appear immediately
+        if self.sync_logging:
+            try:
+                loop = asyncio.get_running_loop()
+                loop.create_task(_log_async())
+            except RuntimeError:
+                # No event loop - fall back to direct console print
+                print(f"LOG (sync): {json.dumps(payload, indent=2, default=str)}", flush=True)
+            return
+
+        # Async mode (default) - fire and forget
+        try:
+            asyncio.create_task(_log_async())
+        except RuntimeError:
+            # No event loop running - fall back to sync print
+            print(f"LOG (no loop): {json.dumps(payload, indent=2, default=str)}", flush=True)
 
     def log_exception(self, exc: Exception, user_id: Optional[str] = None, metadata: Optional[Dict[str, Any]] = None):
         """Logs a Python exception."""

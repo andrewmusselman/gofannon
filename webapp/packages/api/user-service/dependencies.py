@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import sys
 import traceback
 from datetime import datetime
 from typing import Any, Dict, List, Optional
@@ -16,7 +17,7 @@ from fastapi.security import OAuth2PasswordBearer
 from agent_factory.remote_mcp_client import RemoteMCPClient
 from config import settings
 from config.provider_config import PROVIDER_CONFIG as APP_PROVIDER_CONFIG
-from models.agent import Agent
+from models.agent import Agent, LlmSettings
 from models.chat import ChatRequest
 from services.database_service import DatabaseService, get_database_service
 from services.llm_service import call_llm
@@ -52,12 +53,14 @@ def require_admin_access(admin_password: str | None = Header(default=None, alias
         raise HTTPException(status_code=401, detail="Invalid admin password")
 
 
-async def _execute_agent_code(code: str, input_dict: dict, tools: dict, gofannon_agents: List[str], db: DatabaseService):
+async def _execute_agent_code(code: str, input_dict: dict, tools: dict, gofannon_agents: List[str], db: DatabaseService, llm_settings: Optional[LlmSettings] = None):
     """Helper function for recursive execution of agent code."""
-
+    print(f">>> input_dict: {json.dumps(input_dict, indent=2, default=str)}", file=sys.stderr, flush=True)
+    print(f">>> llm_settings: {llm_settings}", file=sys.stderr, flush=True)
     class GofannonClient:
-        def __init__(self, agent_ids: List[str], db_service: DatabaseService):
+        def __init__(self, agent_ids: List[str], db_service: DatabaseService, llm_settings: Optional[LlmSettings] = None):
             self.db = db_service
+            self.llm_settings = llm_settings
             self.agent_map = {}
             if agent_ids:
                 try:
@@ -80,6 +83,7 @@ async def _execute_agent_code(code: str, input_dict: dict, tools: dict, gofannon
                 tools=agent_to_run.tools,
                 gofannon_agents=agent_to_run.gofannon_agents,
                 db=self.db,
+                llm_settings=self.llm_settings,
             )
 
     async def web_search(query: str, model: str = "openai/gpt-4o-mini", search_context_size: str = "medium") -> str:
@@ -155,17 +159,135 @@ async def _execute_agent_code(code: str, input_dict: dict, tools: dict, gofannon
                 print(f"web_search fallback also failed: {type(e2).__name__}: {e2}")
             
             return ""
+# Create a wrapped litellm with full request/response logging
+    import warnings
+    
+    class WrappedLiteLLM:
+        """Wrapper around litellm that logs requests and responses, and applies user LLM settings."""
+        
+        def __init__(self, llm_settings: Optional[LlmSettings] = None):
+            self._llm_settings = llm_settings
+        
+        def _apply_settings(self, kwargs: dict) -> dict:
+            """Apply user LLM settings to kwargs, OVERRIDING any values set by agent code."""
+            if not self._llm_settings:
+                return kwargs
+            
+            # Override max_tokens if user specified it
+            if self._llm_settings.max_tokens is not None:
+                kwargs['max_tokens'] = self._llm_settings.max_tokens
+            
+            # Override temperature if user specified it
+            if self._llm_settings.temperature is not None:
+                kwargs['temperature'] = self._llm_settings.temperature
+            
+            # Override reasoning_effort if user specified it
+            if self._llm_settings.reasoning_effort is not None:
+                if self._llm_settings.reasoning_effort != 'disable':
+                    kwargs['reasoning_effort'] = self._llm_settings.reasoning_effort
+                elif 'reasoning_effort' in kwargs:
+                    # User explicitly disabled reasoning, remove it
+                    del kwargs['reasoning_effort']
+            
+            return kwargs
+        
+        async def acompletion(self, **kwargs):
+            # Apply user settings
+            kwargs = self._apply_settings(kwargs)
+            
+            # Log the request
+            print(f">>> LITELLM REQUEST acompletion", file=sys.stderr, flush=True)
+            print(f">>> model: {kwargs.get('model')}", file=sys.stderr, flush=True)
+            print(f">>> messages: {json.dumps(kwargs.get('messages', []), indent=2, default=str)[:2000]}", file=sys.stderr, flush=True)
+            
+            # Log other params (excluding messages)
+            other_params = {k: v for k, v in kwargs.items() if k != 'messages'}
+            print(f">>> other params: {json.dumps(other_params, indent=2, default=str)[:1000]}", file=sys.stderr, flush=True)
+            
+            with warnings.catch_warnings():
+                warnings.filterwarnings("ignore", message="Pydantic serializer warnings")
+                response = await litellm.acompletion(**kwargs)
+            
+            # Log the response
+            print(f">>> LITELLM RESPONSE", file=sys.stderr, flush=True)
+            print(f">>> response type: {type(response)}", file=sys.stderr, flush=True)
+            print(f">>> response.model: {getattr(response, 'model', 'N/A')}", file=sys.stderr, flush=True)
+            
+            # Log choices
+            if hasattr(response, 'choices') and response.choices:
+                for i, choice in enumerate(response.choices):
+                    print(f">>> choice[{i}].finish_reason: {getattr(choice, 'finish_reason', 'N/A')}", file=sys.stderr, flush=True)
+                    if hasattr(choice, 'message'):
+                        msg = choice.message
+                        print(f">>> choice[{i}].message.role: {getattr(msg, 'role', 'N/A')}", file=sys.stderr, flush=True)
+                        print(f">>> choice[{i}].message.content type: {type(getattr(msg, 'content', None))}", file=sys.stderr, flush=True)
+                        content = getattr(msg, 'content', '')
+                        if isinstance(content, str):
+                            print(f">>> choice[{i}].message.content: {content[:500]}...", file=sys.stderr, flush=True)
+                        else:
+                            print(f">>> choice[{i}].message.content: {json.dumps(content, default=str)[:500]}...", file=sys.stderr, flush=True)
+                        print(f">>> choice[{i}].message.tool_calls: {getattr(msg, 'tool_calls', None)}", file=sys.stderr, flush=True)
+            
+            # Log usage
+            if hasattr(response, 'usage') and response.usage:
+                print(f">>> usage.prompt_tokens: {getattr(response.usage, 'prompt_tokens', 'N/A')}", file=sys.stderr, flush=True)
+                print(f">>> usage.completion_tokens: {getattr(response.usage, 'completion_tokens', 'N/A')}", file=sys.stderr, flush=True)
+                print(f">>> usage.total_tokens: {getattr(response.usage, 'total_tokens', 'N/A')}", file=sys.stderr, flush=True)
+            
+            # Log raw response dict if available
+            try:
+                if hasattr(response, 'model_dump'):
+                    raw = response.model_dump()
+                elif hasattr(response, 'dict'):
+                    raw = response.dict()
+                else:
+                    raw = str(response)
+                print(f">>> FULL RESPONSE DUMP: {json.dumps(raw, indent=2, default=str)[:3000]}", file=sys.stderr, flush=True)
+            except Exception as e:
+                print(f">>> Could not dump response: {e}", file=sys.stderr, flush=True)
+            
+            return response
+        
+        async def aresponses(self, **kwargs):
+            print(f">>> LITELLM REQUEST aresponses", file=sys.stderr, flush=True)
+            print(f">>> kwargs: {json.dumps(kwargs, indent=2, default=str)[:2000]}", file=sys.stderr, flush=True)
+            
+            with warnings.catch_warnings():
+                warnings.filterwarnings("ignore", message="Pydantic serializer warnings")
+                response = await litellm.aresponses(**kwargs)
+            
+            print(f">>> LITELLM RESPONSE aresponses", file=sys.stderr, flush=True)
+            print(f">>> response: {response}", file=sys.stderr, flush=True)
+            
+            return response
+        
+        async def aget_responses(self, **kwargs):
+            print(f">>> LITELLM REQUEST aget_responses", file=sys.stderr, flush=True)
+            print(f">>> kwargs: {json.dumps(kwargs, indent=2, default=str)[:1000]}", file=sys.stderr, flush=True)
+            
+            with warnings.catch_warnings():
+                warnings.filterwarnings("ignore", message="Pydantic serializer warnings")
+                response = await litellm.aget_responses(**kwargs)
+            
+            print(f">>> LITELLM RESPONSE aget_responses", file=sys.stderr, flush=True)
+            print(f">>> response: {response}", file=sys.stderr, flush=True)
+            
+            return response
+        
+        def __getattr__(self, name):
+            # Proxy all other attributes to the real litellm
+            return getattr(litellm, name)
 
     exec_globals = {
         "RemoteMCPClient": RemoteMCPClient,
-        "litellm": litellm,
+        "litellm": WrappedLiteLLM(llm_settings),  # <-- Use wrapped version with user settings
         "asyncio": asyncio,
         "httpx": httpx,
         "re": __import__('re'),
         "json": __import__('json'),
-        "http_client": httpx.AsyncClient(follow_redirects=True),  # Follow redirects automatically
-        "gofannon_client": GofannonClient(gofannon_agents, db),
-        "web_search": web_search,  # Add web search capability
+        "http_client": httpx.AsyncClient(follow_redirects=True),
+        "gofannon_client": GofannonClient(gofannon_agents, db, llm_settings),
+        "web_search": web_search,
         "__builtins__": __builtins__,
     }
 
@@ -173,13 +295,16 @@ async def _execute_agent_code(code: str, input_dict: dict, tools: dict, gofannon
 
     code_obj = compile(code, "<string>", "exec")
     exec(code_obj, exec_globals, local_scope)
-
+    print(f">>> Agent code executed, checking for run function", file=sys.stderr, flush=True)
     run_function = local_scope.get("run")
 
     if not run_function or not asyncio.iscoroutinefunction(run_function):
         raise ValueError("Code did not define an 'async def run(input_dict, tools)' function.")
 
+    print(f">>> Calling agent's run() function", file=sys.stderr, flush=True)
     result = await run_function(input_dict=input_dict, tools=tools)
+    print(f">>> Agent run() returned: {type(result)}", file=sys.stderr, flush=True)
+
     return result
 
 
@@ -230,6 +355,13 @@ async def process_chat(ticket_id: str, request: ChatRequest, user: dict, req: Re
             input_dict = request.parameters.copy()
             # The user query is always mapped to 'inputText'
             input_dict["inputText"] = last_user_message["content"]
+            
+            # Extract LLM settings from request parameters for agent execution
+            llm_settings = LlmSettings(
+                max_tokens=request.parameters.get("max_tokens") or request.parameters.get("maxTokens"),
+                temperature=request.parameters.get("temperature"),
+                reasoning_effort=request.parameters.get("reasoning_effort") or request.parameters.get("reasoningEffort"),
+            ) if any(k in request.parameters for k in ["max_tokens", "maxTokens", "temperature", "reasoning_effort", "reasoningEffort"]) else None
 
             result = await _execute_agent_code(
                 code=agent.code,
@@ -237,6 +369,7 @@ async def process_chat(ticket_id: str, request: ChatRequest, user: dict, req: Re
                 tools=agent.tools,
                 gofannon_agents=agent.gofannon_agents,
                 db=db_service,
+                llm_settings=llm_settings,
             )
 
             if isinstance(result, dict):
@@ -467,7 +600,7 @@ async def list_deployments(db: DatabaseService):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-async def run_deployed_agent(friendly_name: str, input_dict: dict, db: DatabaseService):
+async def run_deployed_agent(friendly_name: str, input_dict: dict, db: DatabaseService, llm_settings: Optional[LlmSettings] = None):
     try:
         deployment_doc = db.get("deployments", friendly_name)
         agent_id = deployment_doc["agentId"]
@@ -481,6 +614,7 @@ async def run_deployed_agent(friendly_name: str, input_dict: dict, db: DatabaseS
             tools=agent.tools,
             gofannon_agents=agent.gofannon_agents,
             db=db,
+            llm_settings=llm_settings,
         )
         return result
     except HTTPException as e:

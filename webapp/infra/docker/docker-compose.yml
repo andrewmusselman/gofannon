@@ -24,6 +24,9 @@ services:
       - "8000:8000"
     environment:
       - APP_ENV=local
+      - LOG_LEVEL=DEBUG
+      - SYNC_LOGGING=true
+      - PYTHONUNBUFFERED=1
       - STORAGE_PROVIDER=s3
       - S3_ENDPOINT_URL=http://minio:9000
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-minioadmin}

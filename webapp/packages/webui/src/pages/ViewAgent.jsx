@@ -884,7 +884,7 @@ const ViewAgent = () => {
                 <TextField 
                     fullWidth
                     multiline
-                    rows={4}
+                    rows={8}
                     label="Agent Description"
                     value={agent.description || ''}
                     onChange={(e) => handleFieldChange('description', e.target.value)}

@@ -1,4 +1,6 @@
-# Code interpreter will work, but needs special handling of responses or throws error: 
+# OpenAI models configuration
+# Updated January 2026
+# Note: Code interpreter needs special handling of responses or throws error:
 # ResponseCodeInterpreterToolCall has no attribute 'content'
 
 models = {
@@ -9,11 +11,25 @@ models = {
         "api_style": "responses",
         "returns_thoughts": True,
         "parameters": {
+            "temperature": {
+                "type": "float",
+                "default": 1.0,
+                "min": 0.0,
+                "max": 2.0,
+                "description": "Randomness (0=focused, 2=very creative)"
+            },
+            "max_tokens": {
+                "type": "integer",
+                "default": 4096,
+                "min": 1,
+                "max": 32768,
+                "description": "Maximum tokens in response"
+            },
             "reasoning_effort": {
-                "type": "choice", 
-                "default": "disable", 
+                "type": "choice",
+                "default": "disable",
                 "choices": ["disable", "low", "medium", "high"],
-                "description": "Reasoning Effort: Effort level for reasoning during generation" 
+                "description": "Reasoning Effort: Effort level for reasoning during generation"
             },
         },
         "built_in_tools": [
@@ -24,11 +40,25 @@ models = {
         "api_style": "responses",
         "returns_thoughts": True,
         "parameters": {
+            "temperature": {
+                "type": "float",
+                "default": 1.0,
+                "min": 0.0,
+                "max": 2.0,
+                "description": "Randomness (0=focused, 2=very creative)"
+            },
+            "max_tokens": {
+                "type": "integer",
+                "default": 4096,
+                "min": 1,
+                "max": 32768,
+                "description": "Maximum tokens in response"
+            },
             "reasoning_effort": {
-                "type": "choice", 
-                "default": "disable", 
+                "type": "choice",
+                "default": "disable",
                 "choices": ["disable", "low", "medium", "high"],
-                "description": "Reasoning Effort: Effort level for reasoning during generation" 
+                "description": "Reasoning Effort: Effort level for reasoning during generation"
             },
         },
         "built_in_tools": [
@@ -39,11 +69,25 @@ models = {
         "api_style": "responses",
         "returns_thoughts": True,
         "parameters": {
+            "temperature": {
+                "type": "float",
+                "default": 1.0,
+                "min": 0.0,
+                "max": 2.0,
+                "description": "Randomness (0=focused, 2=very creative)"
+            },
+            "max_tokens": {
+                "type": "integer",
+                "default": 4096,
+                "min": 1,
+                "max": 32768,
+                "description": "Maximum tokens in response"
+            },
             "reasoning_effort": {
-                "type": "choice", 
-                "default": "medium", 
+                "type": "choice",
+                "default": "medium",
                 "choices": ["low", "medium", "high"],
-                "description": "Reasoning Effort: Effort level for reasoning during generation" 
+                "description": "Reasoning Effort: Effort level for reasoning during generation"
             },
         },
         "built_in_tools": [
@@ -54,11 +98,25 @@ models = {
         "api_style": "responses",
         "returns_thoughts": True,
         "parameters": {
+            "temperature": {
+                "type": "float",
+                "default": 1.0,
+                "min": 0.0,
+                "max": 2.0,
+                "description": "Randomness (0=focused, 2=very creative)"
+            },
+            "max_tokens": {
+                "type": "integer",
+                "default": 4096,
+                "min": 1,
+                "max": 32768,
+                "description": "Maximum tokens in response"
+            },
             "reasoning_effort": {
-                "type": "choice", 
-                "default": "medium", 
+                "type": "choice",
+                "default": "medium",
                 "choices": ["low", "medium", "high"],
-                "description": "Reasoning Effort: Effort level for reasoning during generation" 
+                "description": "Reasoning Effort: Effort level for reasoning during generation"
             },
         },
         "built_in_tools": [
@@ -73,11 +131,25 @@ models = {
         "api_style": "responses",
         "returns_thoughts": True,
         "parameters": {
+            "temperature": {
+                "type": "float",
+                "default": 1.0,
+                "min": 0.0,
+                "max": 2.0,
+                "description": "Randomness (0=focused, 2=very creative)"
+            },
+            "max_tokens": {
+                "type": "integer",
+                "default": 4096,
+                "min": 1,
+                "max": 32768,
+                "description": "Maximum tokens in response"
+            },
             "reasoning_effort": {
-                "type": "choice", 
-                "default": "disable", 
+                "type": "choice",
+                "default": "disable",
                 "choices": ["disable", "low", "medium", "high"],
-                "description": "Reasoning Effort: Effort level for reasoning during generation" 
+                "description": "Reasoning Effort: Effort level for reasoning during generation"
             },
         },
         "built_in_tools": [
@@ -88,11 +160,25 @@ models = {
         "api_style": "responses",
         "returns_thoughts": True,
         "parameters": {
+            "temperature": {
+                "type": "float",
+                "default": 1.0,
+                "min": 0.0,
+                "max": 2.0,
+                "description": "Randomness (0=focused, 2=very creative)"
+            },
+            "max_tokens": {
+                "type": "integer",
+                "default": 4096,
+                "min": 1,
+                "max": 32768,
+                "description": "Maximum tokens in response"
+            },
             "reasoning_effort": {
-                "type": "choice", 
-                "default": "disable", 
+                "type": "choice",
+                "default": "disable",
                 "choices": ["disable", "low", "medium", "high"],
-                "description": "Reasoning Effort: Effort level for reasoning during generation" 
+                "description": "Reasoning Effort: Effort level for reasoning during generation"
             },
         },
         "built_in_tools": [
@@ -103,7 +189,8 @@ models = {
         "api_style": "responses",
         "returns_thoughts": True,
         "parameters": {
-            "temperature": {"type": "float", "default": 0.2, "min": 0.0, "max": 2.0},
+            "temperature": {"type": "float", "default": 0.2, "min": 0.0, "max": 2.0, "description": "Randomness (low default for code)"},
+            "max_tokens": {"type": "integer", "default": 8192, "min": 1, "max": 65536, "description": "Maximum tokens in response"},
         },
         "built_in_tools": []
     },
@@ -111,7 +198,8 @@ models = {
         "api_style": "responses",
         "returns_thoughts": False,
         "parameters": {
-            "temperature": {"type": "float", "default": 0.2, "min": 0.0, "max": 2.0},
+            "temperature": {"type": "float", "default": 0.2, "min": 0.0, "max": 2.0, "description": "Randomness (low default for code)"},
+            "max_tokens": {"type": "integer", "default": 8192, "min": 1, "max": 32768, "description": "Maximum tokens in response"},
         },
         "built_in_tools": []
     },
@@ -119,7 +207,8 @@ models = {
         "api_style": "responses",
         "returns_thoughts": True,
         "parameters": {
-            "temperature": {"type": "float", "default": 0.2, "min": 0.0, "max": 2.0},
+            "temperature": {"type": "float", "default": 0.2, "min": 0.0, "max": 2.0, "description": "Randomness (low default for code)"},
+            "max_tokens": {"type": "integer", "default": 8192, "min": 1, "max": 131072, "description": "Maximum tokens in response"},
         },
         "built_in_tools": []
     },
@@ -131,11 +220,25 @@ models = {
         "api_style": "responses",
         "returns_thoughts": True,
         "parameters": {
+            "temperature": {
+                "type": "float",
+                "default": 1.0,
+                "min": 0.0,
+                "max": 2.0,
+                "description": "Randomness (0=focused, 2=very creative)"
+            },
+            "max_tokens": {
+                "type": "integer",
+                "default": 4096,
+                "min": 1,
+                "max": 32768,
+                "description": "Maximum tokens in response"
+            },
             "reasoning_effort": {
-                "type": "choice", 
-                "default": "disable", 
+                "type": "choice",
+                "default": "disable",
                 "choices": ["disable", "low", "medium", "high"],
-                "description": "Reasoning Effort: Effort level for reasoning during generation" 
+                "description": "Reasoning Effort: Effort level for reasoning during generation"
             },
         },
         "built_in_tools": [
@@ -146,11 +249,25 @@ models = {
         "api_style": "responses",
         "returns_thoughts": True,
         "parameters": {
+            "temperature": {
+                "type": "float",
+                "default": 1.0,
+                "min": 0.0,
+                "max": 2.0,
+                "description": "Randomness (0=focused, 2=very creative)"
+            },
+            "max_tokens": {
+                "type": "integer",
+                "default": 4096,
+                "min": 1,
+                "max": 32768,
+                "description": "Maximum tokens in response"
+            },
             "reasoning_effort": {
-                "type": "choice", 
-                "default": "disable", 
+                "type": "choice",
+                "default": "disable",
                 "choices": ["disable", "low", "medium", "high"],
-                "description": "Reasoning Effort: Effort level for reasoning during generation" 
+                "description": "Reasoning Effort: Effort level for reasoning during generation"
             },
         },
         "built_in_tools": [
@@ -161,11 +278,25 @@ models = {
         "api_style": "responses",
         "returns_thoughts": True,
         "parameters": {
+            "temperature": {
+                "type": "float",
+                "default": 1.0,
+                "min": 0.0,
+                "max": 2.0,
+                "description": "Randomness (0=focused, 2=very creative)"
+            },
+            "max_tokens": {
+                "type": "integer",
+                "default": 4096,
+                "min": 1,
+                "max": 32768,
+                "description": "Maximum tokens in response"
+            },
             "reasoning_effort": {
-                "type": "choice", 
-                "default": "medium", 
+                "type": "choice",
+                "default": "medium",
                 "choices": ["low", "medium", "high"],
-                "description": "Reasoning Effort: Effort level for reasoning during generation" 
+                "description": "Reasoning Effort: Effort level for reasoning during generation"
             },
         },
         "built_in_tools": [
@@ -176,11 +307,25 @@ models = {
         "api_style": "responses",
         "returns_thoughts": True,
         "parameters": {
+            "temperature": {
+                "type": "float",
+                "default": 1.0,
+                "min": 0.0,
+                "max": 2.0,
+                "description": "Randomness (0=focused, 2=very creative)"
+            },
+            "max_tokens": {
+                "type": "integer",
+                "default": 4096,
+                "min": 1,
+                "max": 32768,
+                "description": "Maximum tokens in response"
+            },
             "reasoning_effort": {
-                "type": "choice", 
-                "default": "medium", 
+                "type": "choice",
+                "default": "medium",
                 "choices": ["low", "medium", "high"],
-                "description": "Reasoning Effort: Effort level for reasoning during generation" 
+                "description": "Reasoning Effort: Effort level for reasoning during generation"
             },
         },
         "built_in_tools": [
@@ -191,11 +336,25 @@ models = {
         "api_style": "responses",
         "returns_thoughts": True,
         "parameters": {
+            "temperature": {
+                "type": "float",
+                "default": 1.0,
+                "min": 0.0,
+                "max": 2.0,
+                "description": "Randomness (0=focused, 2=very creative)"
+            },
+            "max_tokens": {
+                "type": "integer",
+                "default": 4096,
+                "min": 1,
+                "max": 16384,
+                "description": "Maximum tokens in response"
+            },
             "reasoning_effort": {
-                "type": "choice", 
-                "default": "disable", 
+                "type": "choice",
+                "default": "disable",
                 "choices": ["disable", "low", "medium", "high"],
-                "description": "Reasoning Effort: Effort level for reasoning during generation" 
+                "description": "Reasoning Effort: Effort level for reasoning during generation"
             },
         },
         "built_in_tools": [
@@ -206,11 +365,25 @@ models = {
         "api_style": "responses",
         "returns_thoughts": True,
         "parameters": {
+            "temperature": {
+                "type": "float",
+                "default": 1.0,
+                "min": 0.0,
+                "max": 2.0,
+                "description": "Randomness (0=focused, 2=very creative)"
+            },
+            "max_tokens": {
+                "type": "integer",
+                "default": 4096,
+                "min": 1,
+                "max": 16384,
+                "description": "Maximum tokens in response"
+            },
             "reasoning_effort": {
-                "type": "choice", 
-                "default": "disable", 
+                "type": "choice",
+                "default": "disable",
                 "choices": ["disable", "low", "medium", "high"],
-                "description": "Reasoning Effort: Effort level for reasoning during generation" 
+                "description": "Reasoning Effort: Effort level for reasoning during generation"
             },
         },
         "built_in_tools": [
@@ -220,7 +393,10 @@ models = {
     "gpt-5-nano": {
         "api_style": "responses",
         "returns_thoughts": False,
-        "parameters": {},
+        "parameters": {
+            "temperature": {"type": "float", "default": 1.0, "min": 0.0, "max": 2.0, "description": "Randomness"},
+            "max_tokens": {"type": "integer", "default": 4096, "min": 1, "max": 8192, "description": "Maximum tokens in response"},
+        },
         "built_in_tools": [
             {"id": "web_search", "description": "Performs a web search.", "tool_config": {"type": "web_search", "search_context_size": "medium"}},
         ]
@@ -228,7 +404,10 @@ models = {
     "gpt-5-nano-2025-08-07": {
         "api_style": "responses",
         "returns_thoughts": False,
-        "parameters": {},
+        "parameters": {
+            "temperature": {"type": "float", "default": 1.0, "min": 0.0, "max": 2.0, "description": "Randomness"},
+            "max_tokens": {"type": "integer", "default": 4096, "min": 1, "max": 8192, "description": "Maximum tokens in response"},
+        },
         "built_in_tools": [
             {"id": "web_search", "description": "Performs a web search.", "tool_config": {"type": "web_search", "search_context_size": "medium"}},
         ]
@@ -237,14 +416,18 @@ models = {
         "api_style": "responses",
         "returns_thoughts": True,
         "parameters": {
-            "temperature": {"type": "float", "default": 0.2, "min": 0.0, "max": 2.0},
+            "temperature": {"type": "float", "default": 0.2, "min": 0.0, "max": 2.0, "description": "Randomness (low default for code)"},
+            "max_tokens": {"type": "integer", "default": 8192, "min": 1, "max": 32768, "description": "Maximum tokens in response"},
         },
         "built_in_tools": []
     },
     "gpt-5-search-api": {
         "api_style": "responses",
         "returns_thoughts": False,
-        "parameters": {},
+        "parameters": {
+            "temperature": {"type": "float", "default": 1.0, "min": 0.0, "max": 2.0, "description": "Randomness"},
+            "max_tokens": {"type": "integer", "default": 4096, "min": 1, "max": 16384, "description": "Maximum tokens in response"},
+        },
         "built_in_tools": [
             {"id": "web_search", "description": "Performs a web search.", "tool_config": {"type": "web_search", "search_context_size": "medium"}},
         ]
@@ -252,7 +435,10 @@ models = {
     "gpt-5-search-api-2025-10-14": {
         "api_style": "responses",
         "returns_thoughts": False,
-        "parameters": {},
+        "parameters": {
+            "temperature": {"type": "float", "default": 1.0, "min": 0.0, "max": 2.0, "description": "Randomness"},
+            "max_tokens": {"type": "integer", "default": 4096, "min": 1, "max": 16384, "description": "Maximum tokens in response"},
+        },
         "built_in_tools": [
             {"id": "web_search", "description": "Performs a web search.", "tool_config": {"type": "web_search", "search_context_size": "medium"}},
         ]
@@ -265,6 +451,7 @@ models = {
         "api_style": "responses",
         "returns_thoughts": True,
         "parameters": {
+            "max_tokens": {"type": "integer", "default": 4096, "min": 1, "max": 32768, "description": "Maximum tokens in response"},
             "reasoning_effort": {
                 "type": "choice",
                 "default": "medium",
@@ -278,6 +465,7 @@ models = {
         "api_style": "responses",
         "returns_thoughts": True,
         "parameters": {
+            "max_tokens": {"type": "integer", "default": 4096, "min": 1, "max": 32768, "description": "Maximum tokens in response"},
             "reasoning_effort": {
                 "type": "choice",
                 "default": "medium",
@@ -291,6 +479,7 @@ models = {
         "api_style": "responses",
         "returns_thoughts": True,
         "parameters": {
+            "max_tokens": {"type": "integer", "default": 4096, "min": 1, "max": 65536, "description": "Maximum tokens in response"},
             "reasoning_effort": {
                 "type": "choice",
                 "default": "high",
@@ -304,6 +493,7 @@ models = {
         "api_style": "responses",
         "returns_thoughts": True,
         "parameters": {
+            "max_tokens": {"type": "integer", "default": 4096, "min": 1, "max": 65536, "description": "Maximum tokens in response"},
             "reasoning_effort": {
                 "type": "choice",
                 "default": "high",
@@ -317,7 +507,8 @@ models = {
         "api_style": "responses",
         "returns_thoughts": True,
         "parameters": {
-            "temperature": {"type": "float", "default": 0.6, "min": 0.0, "max": 2.0},
+            "temperature": {"type": "float", "default": 0.6, "min": 0.0, "max": 2.0, "description": "Randomness"},
+            "max_tokens": {"type": "integer", "default": 4096, "min": 1, "max": 65536, "description": "Maximum tokens in response"},
             "reasoning_effort": {
                 "type": "choice",
                 "default": "medium",
@@ -333,7 +524,8 @@ models = {
         "api_style": "responses",
         "returns_thoughts": True,
         "parameters": {
-            "temperature": {"type": "float", "default": 0.6, "min": 0.0, "max": 2.0},
+            "temperature": {"type": "float", "default": 0.6, "min": 0.0, "max": 2.0, "description": "Randomness"},
+            "max_tokens": {"type": "integer", "default": 4096, "min": 1, "max": 65536, "description": "Maximum tokens in response"},
             "reasoning_effort": {
                 "type": "choice",
                 "default": "medium",
@@ -349,12 +541,13 @@ models = {
         "api_style": "responses",
         "returns_thoughts": True,
         "parameters": {
-            "temperature": {"type": "float", "default": 0.6, "min": 0.0, "max": 2.0},
+            "temperature": {"type": "float", "default": 0.6, "min": 0.0, "max": 2.0, "description": "Randomness"},
+            "max_tokens": {"type": "integer", "default": 4096, "min": 1, "max": 32768, "description": "Maximum tokens in response"},
             "reasoning_effort": {
-                "type": "choice", 
-                "default": "medium", 
+                "type": "choice",
+                "default": "medium",
                 "choices": ["low", "medium", "high"],
-                "description": "Reasoning Effort: Effort level for reasoning during generation" 
+                "description": "Reasoning Effort: Effort level for reasoning during generation"
             },
         },
         "built_in_tools": [
@@ -365,12 +558,13 @@ models = {
         "api_style": "responses",
         "returns_thoughts": True,
         "parameters": {
-            "temperature": {"type": "float", "default": 0.6, "min": 0.0, "max": 2.0},
+            "temperature": {"type": "float", "default": 0.6, "min": 0.0, "max": 2.0, "description": "Randomness"},
+            "max_tokens": {"type": "integer", "default": 4096, "min": 1, "max": 32768, "description": "Maximum tokens in response"},
             "reasoning_effort": {
-                "type": "choice", 
-                "default": "medium", 
+                "type": "choice",
+                "default": "medium",
                 "choices": ["low", "medium", "high"],
-                "description": "Reasoning Effort: Effort level for reasoning during generation" 
+                "description": "Reasoning Effort: Effort level for reasoning during generation"
             },
         },
         "built_in_tools": [
@@ -381,7 +575,8 @@ models = {
         "api_style": "responses",
         "returns_thoughts": True,
         "parameters": {
-            "temperature": {"type": "float", "default": 0.6, "min": 0.0, "max": 2.0},
+            "temperature": {"type": "float", "default": 0.6, "min": 0.0, "max": 2.0, "description": "Randomness"},
+            "max_tokens": {"type": "integer", "default": 4096, "min": 1, "max": 32768, "description": "Maximum tokens in response"},
             "reasoning_effort": {
                 "type": "choice",
                 "default": "medium",
@@ -397,7 +592,8 @@ models = {
         "api_style": "responses",
         "returns_thoughts": True,
         "parameters": {
-            "temperature": {"type": "float", "default": 0.6, "min": 0.0, "max": 2.0},
+            "temperature": {"type": "float", "default": 0.6, "min": 0.0, "max": 2.0, "description": "Randomness"},
+            "max_tokens": {"type": "integer", "default": 4096, "min": 1, "max": 32768, "description": "Maximum tokens in response"},
             "reasoning_effort": {
                 "type": "choice",
                 "default": "medium",
@@ -417,7 +613,8 @@ models = {
         "api_style": "responses",
         "returns_thoughts": False,
         "parameters": {
-            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0},
+            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0, "description": "Randomness"},
+            "max_tokens": {"type": "integer", "default": 4096, "min": 1, "max": 32768, "description": "Maximum tokens in response"},
         },
         "built_in_tools": [
             {"id": "web_search", "description": "Performs a web search.", "tool_config": {"type": "web_search", "search_context_size": "medium"}},
@@ -427,7 +624,8 @@ models = {
         "api_style": "responses",
         "returns_thoughts": False,
         "parameters": {
-            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0},
+            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0, "description": "Randomness"},
+            "max_tokens": {"type": "integer", "default": 4096, "min": 1, "max": 32768, "description": "Maximum tokens in response"},
         },
         "built_in_tools": [
             {"id": "web_search", "description": "Performs a web search.", "tool_config": {"type": "web_search", "search_context_size": "medium"}},
@@ -437,7 +635,8 @@ models = {
         "api_style": "responses",
         "returns_thoughts": False,
         "parameters": {
-            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0},
+            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0, "description": "Randomness"},
+            "max_tokens": {"type": "integer", "default": 4096, "min": 1, "max": 16384, "description": "Maximum tokens in response"},
         },
         "built_in_tools": [
             {"id": "web_search", "description": "Performs a web search.", "tool_config": {"type": "web_search", "search_context_size": "medium"}},
@@ -447,7 +646,8 @@ models = {
         "api_style": "responses",
         "returns_thoughts": False,
         "parameters": {
-            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0},
+            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0, "description": "Randomness"},
+            "max_tokens": {"type": "integer", "default": 4096, "min": 1, "max": 16384, "description": "Maximum tokens in response"},
         },
         "built_in_tools": [
             {"id": "web_search", "description": "Performs a web search.", "tool_config": {"type": "web_search", "search_context_size": "medium"}},
@@ -457,7 +657,8 @@ models = {
         "api_style": "responses",
         "returns_thoughts": False,
         "parameters": {
-            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0},
+            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0, "description": "Randomness"},
+            "max_tokens": {"type": "integer", "default": 4096, "min": 1, "max": 8192, "description": "Maximum tokens in response"},
         },
         "built_in_tools": [
             {"id": "web_search", "description": "Performs a web search.", "tool_config": {"type": "web_search", "search_context_size": "medium"}},
@@ -467,7 +668,8 @@ models = {
         "api_style": "responses",
         "returns_thoughts": False,
         "parameters": {
-            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0},
+            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0, "description": "Randomness"},
+            "max_tokens": {"type": "integer", "default": 4096, "min": 1, "max": 8192, "description": "Maximum tokens in response"},
         },
         "built_in_tools": [
             {"id": "web_search", "description": "Performs a web search.", "tool_config": {"type": "web_search", "search_context_size": "medium"}},
@@ -481,7 +683,8 @@ models = {
         "api_style": "responses",
         "returns_thoughts": False,
         "parameters": {
-            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0},
+            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0, "description": "Randomness"},
+            "max_tokens": {"type": "integer", "default": 4096, "min": 1, "max": 16384, "description": "Maximum tokens in response"},
         },
         "built_in_tools": [
             {"id": "web_search", "description": "Performs a web search.", "tool_config": {"type": "web_search", "search_context_size": "medium"}},
@@ -491,7 +694,8 @@ models = {
         "api_style": "responses",
         "returns_thoughts": False,
         "parameters": {
-            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0},
+            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0, "description": "Randomness"},
+            "max_tokens": {"type": "integer", "default": 4096, "min": 1, "max": 16384, "description": "Maximum tokens in response"},
         },
         "built_in_tools": [
             {"id": "web_search", "description": "Performs a web search.", "tool_config": {"type": "web_search", "search_context_size": "medium"}},
@@ -501,7 +705,8 @@ models = {
         "api_style": "responses",
         "returns_thoughts": False,
         "parameters": {
-            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0},
+            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0, "description": "Randomness"},
+            "max_tokens": {"type": "integer", "default": 4096, "min": 1, "max": 16384, "description": "Maximum tokens in response"},
         },
         "built_in_tools": [
             {"id": "web_search", "description": "Performs a web search.", "tool_config": {"type": "web_search", "search_context_size": "medium"}},
@@ -511,7 +716,8 @@ models = {
         "api_style": "responses",
         "returns_thoughts": False,
         "parameters": {
-            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0},
+            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0, "description": "Randomness"},
+            "max_tokens": {"type": "integer", "default": 4096, "min": 1, "max": 16384, "description": "Maximum tokens in response"},
         },
         "built_in_tools": [
             {"id": "web_search", "description": "Performs a web search.", "tool_config": {"type": "web_search", "search_context_size": "medium"}},
@@ -521,7 +727,8 @@ models = {
         "api_style": "responses",
         "returns_thoughts": False,
         "parameters": {
-            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0},
+            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0, "description": "Randomness"},
+            "max_tokens": {"type": "integer", "default": 4096, "min": 1, "max": 16384, "description": "Maximum tokens in response"},
         },
         "built_in_tools": [
             {"id": "web_search", "description": "Performs a web search.", "tool_config": {"type": "web_search", "search_context_size": "medium"}},
@@ -531,7 +738,8 @@ models = {
         "api_style": "responses",
         "returns_thoughts": False,
         "parameters": {
-            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0},
+            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0, "description": "Randomness"},
+            "max_tokens": {"type": "integer", "default": 4096, "min": 1, "max": 16384, "description": "Maximum tokens in response"},
         },
         "built_in_tools": [
             {"id": "web_search", "description": "Performs a web search.", "tool_config": {"type": "web_search", "search_context_size": "medium"}},
@@ -541,7 +749,8 @@ models = {
         "api_style": "responses",
         "returns_thoughts": False,
         "parameters": {
-            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0},
+            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0, "description": "Randomness"},
+            "max_tokens": {"type": "integer", "default": 4096, "min": 1, "max": 16384, "description": "Maximum tokens in response"},
         },
         "built_in_tools": [
             {"id": "web_search", "description": "Performs a web search.", "tool_config": {"type": "web_search", "search_context_size": "medium"}},
@@ -555,7 +764,8 @@ models = {
         "api_style": "responses",
         "returns_thoughts": False,
         "parameters": {
-            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0},
+            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0, "description": "Randomness"},
+            "max_tokens": {"type": "integer", "default": 4096, "min": 1, "max": 16384, "description": "Maximum tokens in response"},
         },
         "built_in_tools": [
             {"id": "web_search", "description": "Performs a web search.", "tool_config": {"type": "web_search", "search_context_size": "medium"}},
@@ -565,7 +775,8 @@ models = {
         "api_style": "responses",
         "returns_thoughts": False,
         "parameters": {
-            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0},
+            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0, "description": "Randomness"},
+            "max_tokens": {"type": "integer", "default": 4096, "min": 1, "max": 16384, "description": "Maximum tokens in response"},
         },
         "built_in_tools": [
             {"id": "web_search", "description": "Performs a web search.", "tool_config": {"type": "web_search", "search_context_size": "medium"}},
@@ -575,7 +786,8 @@ models = {
         "api_style": "responses",
         "returns_thoughts": False,
         "parameters": {
-            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0},
+            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0, "description": "Randomness"},
+            "max_tokens": {"type": "integer", "default": 4096, "min": 1, "max": 16384, "description": "Maximum tokens in response"},
         },
         "built_in_tools": [
             {"id": "web_search", "description": "Performs a web search.", "tool_config": {"type": "web_search", "search_context_size": "medium"}},
@@ -585,7 +797,8 @@ models = {
         "api_style": "responses",
         "returns_thoughts": False,
         "parameters": {
-            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0},
+            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0, "description": "Randomness"},
+            "max_tokens": {"type": "integer", "default": 4096, "min": 1, "max": 16384, "description": "Maximum tokens in response"},
         },
         "built_in_tools": [
             {"id": "web_search", "description": "Performs a web search.", "tool_config": {"type": "web_search", "search_context_size": "medium"}},
@@ -593,112 +806,123 @@ models = {
     },
 
     # =========================================================================
-    # GPT-4 Turbo Series
+    # GPT-4 Turbo Series (Legacy - uses chat completions API)
     # =========================================================================
     "gpt-4-turbo": {
+        "api_style": "chat_completions",
         "returns_thoughts": False,
         "parameters": {
-            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0, "mutually_exclusive_with": ["top_p"]},
-            "top_p": {"type": "float", "default": 1.0, "min": 0.0, "max": 1.0, "mutually_exclusive_with": ["temperature"]},
-            "max_tokens": {"type": "int", "default": 4096, "min": 1, "max": 4096},
+            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0, "mutually_exclusive_with": ["top_p"], "description": "Randomness"},
+            "top_p": {"type": "float", "default": 1.0, "min": 0.0, "max": 1.0, "mutually_exclusive_with": ["temperature"], "description": "Nucleus sampling"},
+            "max_tokens": {"type": "integer", "default": 4096, "min": 1, "max": 4096, "description": "Maximum tokens in response"},
         },
         "built_in_tools": []
     },
     "gpt-4-turbo-2024-04-09": {
+        "api_style": "chat_completions",
         "returns_thoughts": False,
         "parameters": {
-            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0, "mutually_exclusive_with": ["top_p"]},
-            "top_p": {"type": "float", "default": 1.0, "min": 0.0, "max": 1.0, "mutually_exclusive_with": ["temperature"]},
-            "max_tokens": {"type": "int", "default": 4096, "min": 1, "max": 4096},
+            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0, "mutually_exclusive_with": ["top_p"], "description": "Randomness"},
+            "top_p": {"type": "float", "default": 1.0, "min": 0.0, "max": 1.0, "mutually_exclusive_with": ["temperature"], "description": "Nucleus sampling"},
+            "max_tokens": {"type": "integer", "default": 4096, "min": 1, "max": 4096, "description": "Maximum tokens in response"},
         },
         "built_in_tools": []
     },
     "gpt-4-turbo-preview": {
+        "api_style": "chat_completions",
         "returns_thoughts": False,
         "parameters": {
-            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0, "mutually_exclusive_with": ["top_p"]},
-            "top_p": {"type": "float", "default": 1.0, "min": 0.0, "max": 1.0, "mutually_exclusive_with": ["temperature"]},
-            "max_tokens": {"type": "int", "default": 4096, "min": 1, "max": 4096},
+            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0, "mutually_exclusive_with": ["top_p"], "description": "Randomness"},
+            "top_p": {"type": "float", "default": 1.0, "min": 0.0, "max": 1.0, "mutually_exclusive_with": ["temperature"], "description": "Nucleus sampling"},
+            "max_tokens": {"type": "integer", "default": 4096, "min": 1, "max": 4096, "description": "Maximum tokens in response"},
         },
         "built_in_tools": []
     },
     "gpt-4-0125-preview": {
+        "api_style": "chat_completions",
         "returns_thoughts": False,
         "parameters": {
-            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0, "mutually_exclusive_with": ["top_p"]},
-            "top_p": {"type": "float", "default": 1.0, "min": 0.0, "max": 1.0, "mutually_exclusive_with": ["temperature"]},
-            "max_tokens": {"type": "int", "default": 4096, "min": 1, "max": 4096},
+            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0, "mutually_exclusive_with": ["top_p"], "description": "Randomness"},
+            "top_p": {"type": "float", "default": 1.0, "min": 0.0, "max": 1.0, "mutually_exclusive_with": ["temperature"], "description": "Nucleus sampling"},
+            "max_tokens": {"type": "integer", "default": 4096, "min": 1, "max": 4096, "description": "Maximum tokens in response"},
         },
         "built_in_tools": []
     },
     "gpt-4-1106-preview": {
+        "api_style": "chat_completions",
         "returns_thoughts": False,
         "parameters": {
-            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0, "mutually_exclusive_with": ["top_p"]},
-            "top_p": {"type": "float", "default": 1.0, "min": 0.0, "max": 1.0, "mutually_exclusive_with": ["temperature"]},
-            "max_tokens": {"type": "int", "default": 4096, "min": 1, "max": 4096},
+            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0, "mutually_exclusive_with": ["top_p"], "description": "Randomness"},
+            "top_p": {"type": "float", "default": 1.0, "min": 0.0, "max": 1.0, "mutually_exclusive_with": ["temperature"], "description": "Nucleus sampling"},
+            "max_tokens": {"type": "integer", "default": 4096, "min": 1, "max": 4096, "description": "Maximum tokens in response"},
         },
         "built_in_tools": []
     },
 
     # =========================================================================
-    # GPT-4 Base
+    # GPT-4 Base (Legacy)
     # =========================================================================
     "gpt-4": {
+        "api_style": "chat_completions",
         "returns_thoughts": False,
         "parameters": {
-            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0, "mutually_exclusive_with": ["top_p"]},
-            "top_p": {"type": "float", "default": 1.0, "min": 0.0, "max": 1.0, "mutually_exclusive_with": ["temperature"]},
-            "max_tokens": {"type": "int", "default": 8192, "min": 1, "max": 8192},
+            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0, "mutually_exclusive_with": ["top_p"], "description": "Randomness"},
+            "top_p": {"type": "float", "default": 1.0, "min": 0.0, "max": 1.0, "mutually_exclusive_with": ["temperature"], "description": "Nucleus sampling"},
+            "max_tokens": {"type": "integer", "default": 8192, "min": 1, "max": 8192, "description": "Maximum tokens in response"},
         },
         "built_in_tools": []
     },
     "gpt-4-0613": {
+        "api_style": "chat_completions",
         "returns_thoughts": False,
         "parameters": {
-            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0, "mutually_exclusive_with": ["top_p"]},
-            "top_p": {"type": "float", "default": 1.0, "min": 0.0, "max": 1.0, "mutually_exclusive_with": ["temperature"]},
-            "max_tokens": {"type": "int", "default": 8192, "min": 1, "max": 8192},
+            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0, "mutually_exclusive_with": ["top_p"], "description": "Randomness"},
+            "top_p": {"type": "float", "default": 1.0, "min": 0.0, "max": 1.0, "mutually_exclusive_with": ["temperature"], "description": "Nucleus sampling"},
+            "max_tokens": {"type": "integer", "default": 8192, "min": 1, "max": 8192, "description": "Maximum tokens in response"},
         },
         "built_in_tools": []
     },
 
     # =========================================================================
-    # GPT-3.5 Series
+    # GPT-3.5 Series (Legacy)
     # =========================================================================
     "gpt-3.5-turbo": {
+        "api_style": "chat_completions",
         "returns_thoughts": False,
         "parameters": {
-            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0, "mutually_exclusive_with": ["top_p"]},
-            "top_p": {"type": "float", "default": 1.0, "min": 0.0, "max": 1.0, "mutually_exclusive_with": ["temperature"]},
-            "max_tokens": {"type": "int", "default": 4096, "min": 1, "max": 4096},
+            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0, "mutually_exclusive_with": ["top_p"], "description": "Randomness"},
+            "top_p": {"type": "float", "default": 1.0, "min": 0.0, "max": 1.0, "mutually_exclusive_with": ["temperature"], "description": "Nucleus sampling"},
+            "max_tokens": {"type": "integer", "default": 4096, "min": 1, "max": 4096, "description": "Maximum tokens in response"},
         },
         "built_in_tools": []
     },
     "gpt-3.5-turbo-0125": {
+        "api_style": "chat_completions",
         "returns_thoughts": False,
         "parameters": {
-            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0, "mutually_exclusive_with": ["top_p"]},
-            "top_p": {"type": "float", "default": 1.0, "min": 0.0, "max": 1.0, "mutually_exclusive_with": ["temperature"]},
-            "max_tokens": {"type": "int", "default": 4096, "min": 1, "max": 4096},
+            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0, "mutually_exclusive_with": ["top_p"], "description": "Randomness"},
+            "top_p": {"type": "float", "default": 1.0, "min": 0.0, "max": 1.0, "mutually_exclusive_with": ["temperature"], "description": "Nucleus sampling"},
+            "max_tokens": {"type": "integer", "default": 4096, "min": 1, "max": 4096, "description": "Maximum tokens in response"},
         },
         "built_in_tools": []
     },
     "gpt-3.5-turbo-1106": {
+        "api_style": "chat_completions",
         "returns_thoughts": False,
         "parameters": {
-            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0, "mutually_exclusive_with": ["top_p"]},
-            "top_p": {"type": "float", "default": 1.0, "min": 0.0, "max": 1.0, "mutually_exclusive_with": ["temperature"]},
-            "max_tokens": {"type": "int", "default": 4096, "min": 1, "max": 4096},
+            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0, "mutually_exclusive_with": ["top_p"], "description": "Randomness"},
+            "top_p": {"type": "float", "default": 1.0, "min": 0.0, "max": 1.0, "mutually_exclusive_with": ["temperature"], "description": "Nucleus sampling"},
+            "max_tokens": {"type": "integer", "default": 4096, "min": 1, "max": 4096, "description": "Maximum tokens in response"},
         },
         "built_in_tools": []
     },
     "gpt-3.5-turbo-16k": {
+        "api_style": "chat_completions",
         "returns_thoughts": False,
         "parameters": {
-            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0, "mutually_exclusive_with": ["top_p"]},
-            "top_p": {"type": "float", "default": 1.0, "min": 0.0, "max": 1.0, "mutually_exclusive_with": ["temperature"]},
-            "max_tokens": {"type": "int", "default": 4096, "min": 1, "max": 16384},
+            "temperature": {"type": "float", "default": 0.7, "min": 0.0, "max": 2.0, "mutually_exclusive_with": ["top_p"], "description": "Randomness"},
+            "top_p": {"type": "float", "default": 1.0, "min": 0.0, "max": 1.0, "mutually_exclusive_with": ["temperature"], "description": "Nucleus sampling"},
+            "max_tokens": {"type": "integer", "default": 4096, "min": 1, "max": 16384, "description": "Maximum tokens in response"},
         },
         "built_in_tools": []
     },

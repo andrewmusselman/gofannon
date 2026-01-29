@@ -77,7 +77,7 @@ async def _execute_agent_code(code: str, input_dict: dict, tools: dict, gofannon
                 raise ValueError(f"Gofannon agent '{agent_name}' not found or not imported for this run.")
 
             # Recursive call to the execution helper
-            return await _execute_agent_code(
+            result = await _execute_agent_code(
                 code=agent_to_run.code,
                 input_dict=input_dict,
                 tools=agent_to_run.tools,
@@ -85,6 +85,12 @@ async def _execute_agent_code(code: str, input_dict: dict, tools: dict, gofannon
                 db=self.db,
                 llm_settings=self.llm_settings,
             )
+
+            # Unwrap outputText if present, so callers get the content directly
+            # This prevents double-wrapping when agents return {"outputText": "..."}
+            if isinstance(result, dict) and "outputText" in result and len(result) == 1:
+                return result["outputText"]
+            return result
 
     async def web_search(query: str, model: str = "openai/gpt-4o-mini", search_context_size: str = "medium") -> str:
         """

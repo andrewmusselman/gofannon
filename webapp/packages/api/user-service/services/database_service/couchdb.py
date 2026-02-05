@@ -23,7 +23,7 @@ class CouchDBService(DatabaseService):
             return self.server[db_name]
         except couchdb.http.ResourceNotFound:
             print(f"Database '{db_name}' not found. Creating it.")
-            return self.server.create(db_name)
+            return self.server.create(db_name, n=1, q=2)
 
     def get(self, db_name: str, doc_id: str) -> Dict[str, Any]:
         db = self._get_or_create_db(db_name)
